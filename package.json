@@ -1,0 +1,30 @@
+{
+  "name": "fenx-core",
+  "version": "0.0.0",
+  "description": "Free tv site",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape \"test/**/*.js\""
+  },
+  "dependencies": {
+    "async": "0.9.0",
+    "autoprefixer": "^2.1.0",
+    "clean-css": "^2.2.6",
+    "clone": "0.1.16",
+    "less": "^1.7.3",
+    "paramify": "^0.1.2",
+    "express": "~4.8.3",
+    "sandal": "~2.2.2",
+    "swig": "~1.4.2",
+    "deep-equal": "~0.2.1",
+    "glob": "~4.0.5",
+    "uglify-js": "~2.4.15"
+  },
+  "devDependencies": {
+    "tape": "~2.12.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://marcusberner@bitbucket.org/liketv/fenx-core.git"
+  }
+}
