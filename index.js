@@ -1,7 +1,14 @@
 module.exports = function(options, callback) {
 
+	if (!callback) {
+		callback = options;
+		options = {};
+	}
+
+	require('./lib/init/setDefaults.js')(options);
+
 	var app = require('express')(),
-		sandal = require('./lib/init/registerDependencies.js')();
+		sandal = require('./lib/init/registerDependencies.js')(options);
 
 	require('./lib/init/loadWidgets.js')(sandal, function (err) {
 		if (err) return callback(err);
