@@ -5,6 +5,8 @@ module.exports = function(options, callback) {
 		options = {};
 	}
 
+	require('./lib/filters/cacheBust.js');
+
 	require('./lib/init/setDefaults.js')(options);
 
 	var app = require('express')(),
