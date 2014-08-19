@@ -5,7 +5,9 @@ module.exports = function(options, callback) {
 		options = {};
 	}
 
+	// Filters
 	require('./lib/filters/cacheBust.js');
+	require('./lib/filters/translate.js')(options.dictionaries || []);
 
 	require('./lib/init/setDefaults.js')(options);
 
