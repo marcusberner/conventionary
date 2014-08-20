@@ -1,7 +1,7 @@
 {
-  "name": "webframework",
+  "name": "https://github.com/marcusberner/conventional.git",
   "version": "0.0.0",
-  "description": "Free tv site",
+  "description": "Convention based web framework",
   "main": "index.js",
   "scripts": {
     "test": "tape \"test/**/*.js\""
@@ -22,8 +22,5 @@
   "devDependencies": {
     "tape": "~2.12.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://marcusberner@bitbucket.org/liketv/fenx-core.git"
-  }
+	"repository": "git://github.com/marcusberner/sandal"
 }
