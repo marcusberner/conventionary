@@ -1,5 +1,5 @@
 {
-  "name": "https://github.com/marcusberner/conventional.git",
+  "name": "conventional",
   "version": "0.0.0",
   "description": "Convention based web framework",
   "main": "index.js",
@@ -22,5 +22,5 @@
   "devDependencies": {
     "tape": "~2.12.2"
   },
-	"repository": "git://github.com/marcusberner/sandal"
+	"repository": "https://github.com/marcusberner/conventional.git"
 }
