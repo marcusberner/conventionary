@@ -1,4 +1,7 @@
-var async = require('async');
+var path = require('path'),
+	prettyCamel = require('pretty-camel'),
+	async = require('async'),
+	Sandal = require('sandal').extend(require('sandal-autowire'));
 
 module.exports = function(options, callback) {
 
@@ -7,38 +10,76 @@ module.exports = function(options, callback) {
 		options = {};
 	}
 
-	require('./lib/init/setDefaults.js')(options);
+	setDefaults(options);
 
-	var express = require('express'),
+	var sandal = new Sandal(),
+		siteSandal = new Sandal(),
+		express = require('express'),
+		swig = require('swig'),
 		app = express(),
-		sandal = require('./lib/init/registerDependencies.js')(app, options);
+		initFunctions = [];
 
-	sandal.resolve(function (err, init) {
+	registerSiteDependencies(siteSandal, options, express, swig, app);
+	registerInternalDependencies(sandal, siteSandal, options, express, swig, app);
 
+	sandal.resolve(['init', 'logger', 'app'], function (err, fwInit, logger, app) {
 		if (err) return callback(err);
-
-		async.parallel(init, function (err) {
-
+		siteSandal.resolve('init', function (err, siteInit) {
 			if (err) return callback(err);
-			sandal.remove('init');
-
-			// Filters
-			require('./lib/filters/cacheBust.js');
-			require('./lib/filters/translate.js')(options.dictionaries || []);
-
-			require('./lib/init/loadWidgets.js')(sandal, function (err) {
+			addInitFunctions(initFunctions, siteInit, logger);
+			addInitFunctions(initFunctions, fwInit, logger);
+			async.series(initFunctions, function (err) {
 				if (err) return callback(err);
-				require('./lib/init/loadRoutes.js')(app, sandal, function (err) {
-					if (err) return callback(err);
-					require('./lib/init/registerLessRoute.js')(app, options);
-					require('./lib/init/registerScriptRoute.js')(app, options);
-					require('./lib/init/registerStaticRoute.js')(app, options);
-					callback(null, app);
-				});
+				callback(null, app);
 			});
-
 		});
-
 	});
 
 };
+
+function setDefaults(options) {
+	options.dictionaries = options.dictionaries || [];
+	options.lessPath = toAbsolutePath(options.lessPath || './style');
+	options.staticPath = toAbsolutePath(options.staticPath || './public');
+	options.scriptPath = toAbsolutePath(options.scriptPath || './script');
+	options.libPath = toAbsolutePath(options.libPath || './lib');
+	options.initPath = toAbsolutePath(options.initPath || './init');
+	options.widgetPath = toAbsolutePath(options.widgetPath || './widgets');
+	options.routePath = toAbsolutePath(options.routePath || './routes');
+}
+
+function toAbsolutePath(input) {
+	if (input.indexOf('./') === 0 || input.indexOf('../') === 0) return path.join(process.cwd(), input).replace(/\/$/, '');
+	return input.replace(/\/$/, '');
+}
+
+function registerSiteDependencies(siteSandal, options, express, swig, app) {
+	siteSandal
+		.object('express', express)
+		.object('swig', swig)
+		.object('app', app)
+		.autowire(options.initPath, { groups: ['init'] })
+		.autowire(options.libPath);
+	if (!siteSandal.has('init')) siteSandal.object('init', {});
+}
+
+function registerInternalDependencies(sandal, siteSandal, options, express, swig, app) {
+	sandal
+		.object('siteSandal', siteSandal)
+		.object('options', options)
+		.object('express', express)
+		.object('swig', swig)
+		.object('app', app)
+		.autowire(path.join(__dirname, '/init'), { groups: ['init'] })
+		.autowire(path.join(__dirname, '/lib'));
+	if (!sandal.has('init')) sandal.object('init', {});
+}
+
+function addInitFunctions(list, init, logger) {
+	Object.keys(init).sort().forEach(function (key) {
+		list.push(function (done) {
+			logger.info(prettyCamel(key.replace(/^\d+_?-?/, '')));
+			init[key](done);
+		});
+	});
+}

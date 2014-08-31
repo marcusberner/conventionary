@@ -12,15 +12,16 @@
     "clean-css": "^2.2.6",
     "less": "^1.7.3",
     "express": "~4.8.3",
-    "sandal": "~2.3.0",
+    "sandal": "~3.0.0",
     "swig": "~1.4.2",
     "deep-equal": "~0.2.1",
     "glob": "~4.0.5",
     "uglify-js": "~2.4.15",
-    "sandal-autowire": "~2.0.0"
+    "sandal-autowire": "~2.1.0",
+    "pretty-camel": "0.0.8"
   },
   "devDependencies": {
     "tape": "~2.12.2"
   },
-	"repository": "https://github.com/marcusberner/conventional.git"
+  "repository": "https://github.com/marcusberner/conventional.git"
 }

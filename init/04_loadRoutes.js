@@ -1,16 +1,30 @@
 
 var fs = require('fs'),
 	path = require('path'),
-	async = require('async');
+	async = require('async'),
+	routeCount,
+	_addWidgetRenderers,
+	_renderTemplate;
 
-module.exports = function (app, sandal, callback) {
+module.exports = function (app, options, siteSandal, addWidgetRenderers, renderTemplate, logger) {
 
-	var routesDir = path.join(process.cwd(), '/routes');
-	if (!fs.existsSync(routesDir) || !fs.statSync(routesDir).isDirectory()) return callback();
+	return function (callback) {
 
-	async.each(fs.readdirSync(routesDir), function (file, fileCallback) {
-		loadFolder(app, routesDir, file, 'routes/', sandal, fileCallback)
-	}, callback);
+		_addWidgetRenderers = addWidgetRenderers;
+		_renderTemplate = renderTemplate;
+		routeCount = 0;
+
+		if (!fs.existsSync(options.routePath) || !fs.statSync(options.routePath).isDirectory()) return callback();
+
+		async.each(fs.readdirSync(options.routePath), function (file, fileCallback) {
+			loadFolder(app, options.routePath, file, 'routes/', siteSandal	, fileCallback)
+		}, function (err) {
+			if (err) return callback(err);
+			logger.info('Loading ' + routeCount + ' routes done');
+			callback();
+		});
+
+	};
 
 };
 
@@ -47,6 +61,8 @@ function loadFolder(app, parentDir, file, dependencyNamePrefix, sandal, callback
 
 function registerRoute(app, route, templatePath, callback) {
 
+	routeCount++;
+
 	if (route.handler) {
 		app.get(route.path, route.handler);
 		return callback();
@@ -59,14 +75,14 @@ function registerRoute(app, route, templatePath, callback) {
 			requestContext = {
 				request: req
 			};
-		require('../utils/addWidgetRenderers.js')(internalRequestContext, requestContext);
+		_addWidgetRenderers(internalRequestContext, requestContext);
 		test(requestContext, function (err, result) {
 			if (err) return next(err);
 			if (!result) return next();
 			factory(requestContext, function (err, model, template) {
 				if (err) return next(err);
 				if (template) templatePath = path.join(templatePath, '../', template);
-				require('../utils/renderTemplate')(templatePath, internalRequestContext, model, function (err, html) {
+				_renderTemplate(templatePath, internalRequestContext, model, function (err, html) {
 					if (err) return next(err);
 					res.set({
 						'Content-Type': 'text/html'
