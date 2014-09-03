@@ -79,9 +79,10 @@ function registerRoute(app, route, templatePath, callback) {
 		test(requestContext, function (err, result) {
 			if (err) return next(err);
 			if (!result) return next();
-			factory(requestContext, function (err, model, template) {
+			factory(requestContext, function (err, model, options) {
 				if (err) return next(err);
-				if (template) templatePath = path.join(templatePath, '../', template);
+				options = options || {};
+				if (options.template) templatePath = path.join(templatePath, '../', options.template);
 				_renderTemplate(templatePath, internalRequestContext, model, function (err, html) {
 					if (err) return next(err);
 					res.set({
