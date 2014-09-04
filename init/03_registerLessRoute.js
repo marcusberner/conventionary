@@ -11,6 +11,8 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 			getFilePathAndType(req.path, function (pathAndType) {
 				if (!pathAndType) return next();
 				getLess(siteSandal, req, pathAndType, function (err, data) {
+					if (err) return next(err);
+					data = data || '';
 					if (req.query.includeWidgets === 'true') {
 						widgets.forEach(function(widget) {
 							if (!widget.less) return;
