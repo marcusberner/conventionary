@@ -16,7 +16,9 @@ module.exports = function (app, options, lessCompiler, widgets) {
 				if (req.query.includeWidgets === 'true') {
 					widgets.forEach(function(widget) {
 						if (!widget.less) return;
-						data += ('.widget-' + widget.path.join('_') + '{ @import \''+ path.relative(path.dirname(filePath), widget.less) + '\';}');
+						if (widget.wrap) data += ('.widget-' + widget.path.join('_') + '{');
+						data += (' @import \''+ path.relative(path.dirname(filePath), widget.less) + '\'; ');
+						if (widget.wrap) data += '}';
 					});
 				}
 				lessCompiler(filePath, data, function (err, css) {
