@@ -33,8 +33,7 @@ function loadFolder(app, parentDir, file, dependencyNamePrefix, sandal, callback
 	var routeDir = path.join(parentDir, file),
 		routePath = path.join(routeDir, file + '.js'),
 		templatePath = path.join(routeDir, file + '.html'),
-		route,
-		dependencyName = dependencyNamePrefix + file;
+		route;
 
 	if (!fs.existsSync(routeDir) || !fs.statSync(routeDir).isDirectory()) return callback();
 
@@ -47,16 +46,21 @@ function loadFolder(app, parentDir, file, dependencyNamePrefix, sandal, callback
 
 		route = require(routePath);
 
-		if (typeof route === 'function') sandal.factory(dependencyName, route);
-		else sandal.object(dependencyName, route);
-
-		sandal.resolve(dependencyName, function (err, resolvedRoute) {
+		resolveRoute(sandal, route, function (err, resolvedRoute) {
 			if (err) return callback(err);
 			registerRoute(app, resolvedRoute, templatePath, callback);
 		});
 
 	});
 
+}
+
+function resolveRoute(sandal, route, callback) {
+	if (typeof route === 'function') {
+		sandal.resolveAsFactory(route, callback);
+	} else {
+		callback(null, route);
+	}
 }
 
 function registerRoute(app, route, templatePath, callback) {

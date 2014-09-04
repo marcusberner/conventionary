@@ -15,7 +15,7 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 						widgets.forEach(function(widget) {
 							if (!widget.less) return;
 							if (widget.wrap) data += ('.widget-' + widget.path.join('_') + '{');
-							data += (' @import \''+ path.relative(path.dirname(filePath), widget.less) + '\'; ');
+							data += (' @import \''+ path.relative(path.dirname(pathAndType.path), widget.less) + '\'; ');
 							if (widget.wrap) data += '}';
 						});
 					}
