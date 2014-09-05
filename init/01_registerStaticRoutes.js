@@ -1,9 +1,8 @@
-var path = require('path');
 
 module.exports = function (app, express, options) {
 
 	return function(callback) {
-		app.use(express.static(path.join(process.cwd(), options.staticPath)));
+		app.use(express.static(options.staticPath));
 		callback();
 	}
 
