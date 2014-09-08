@@ -20,7 +20,6 @@ module.exports = function (app, options, siteSandal, addWidgetRenderers, renderT
 			loadFolder(app, options.routePath, file, siteSandal	, fileCallback)
 		}, function (err) {
 			if (err) return callback(err);
-			addNotFoundRout(app, options);
 			logger.info('Loading ' + routeCount + ' routes done');
 			callback();
 		});
@@ -102,25 +101,4 @@ function registerRoute(app, route, templatePath, callback) {
 
 	callback();
 
-}
-
-function addNotFoundRout(app, options) {
-
-	var templatePath = path.join(options.routePath, '404.html');
-	if (!fs.existsSync(templatePath)) return;
-	app.get('/*', function (req, res, next) {
-		var internalRequestContext = {},
-			requestContext = {
-				request: req
-			};
-		_addWidgetRenderers(internalRequestContext, requestContext);
-		_renderTemplate(templatePath, internalRequestContext, null, function (err, html) {
-			if (err) return next(err);
-			res.status(404);
-			res.set({
-				'Content-Type': 'text/html'
-			});
-			res.send(html);
-		});
-	});
 }
