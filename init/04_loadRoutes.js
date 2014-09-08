@@ -17,9 +17,10 @@ module.exports = function (app, options, siteSandal, addWidgetRenderers, renderT
 		if (!fs.existsSync(options.routePath) || !fs.statSync(options.routePath).isDirectory()) return callback();
 
 		async.each(fs.readdirSync(options.routePath), function (file, fileCallback) {
-			loadFolder(app, options.routePath, file, 'routes/', siteSandal	, fileCallback)
+			loadFolder(app, options.routePath, file, siteSandal	, fileCallback)
 		}, function (err) {
 			if (err) return callback(err);
+			addNotFoundRout(app, options);
 			logger.info('Loading ' + routeCount + ' routes done');
 			callback();
 		});
@@ -28,7 +29,7 @@ module.exports = function (app, options, siteSandal, addWidgetRenderers, renderT
 
 };
 
-function loadFolder(app, parentDir, file, dependencyNamePrefix, sandal, callback) {
+function loadFolder(app, parentDir, file, sandal, callback) {
 
 	var routeDir = path.join(parentDir, file),
 		routePath = path.join(routeDir, file + '.js'),
@@ -38,7 +39,7 @@ function loadFolder(app, parentDir, file, dependencyNamePrefix, sandal, callback
 	if (!fs.existsSync(routeDir) || !fs.statSync(routeDir).isDirectory()) return callback();
 
 	async.each(fs.readdirSync(routeDir), function (file, fileCallback) {
-		loadFolder(app, routeDir, file, dependencyNamePrefix + file + '.', sandal, fileCallback)
+		loadFolder(app, routeDir, file, sandal, fileCallback)
 	}, function (err) {
 
 		if (err) callback(err);
@@ -101,4 +102,25 @@ function registerRoute(app, route, templatePath, callback) {
 
 	callback();
 
+}
+
+function addNotFoundRout(app, options) {
+
+	var templatePath = path.join(options.routePath, '404.html');
+	if (!fs.existsSync(templatePath)) return;
+	app.get('/*', function (req, res, next) {
+		var internalRequestContext = {},
+			requestContext = {
+				request: req
+			};
+		_addWidgetRenderers(internalRequestContext, requestContext);
+		_renderTemplate(templatePath, internalRequestContext, null, function (err, html) {
+			if (err) return next(err);
+			res.status(404);
+			res.set({
+				'Content-Type': 'text/html'
+			});
+			res.send(html);
+		});
+	});
 }
