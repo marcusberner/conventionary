@@ -6,7 +6,6 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
 
 	return function (callback) {
 
-
 		var templatePath = path.join(options.routePath, '404.html');
 		if (!fs.existsSync(templatePath)) return callback();
 		app.get('/*', function (req, res, next) {
@@ -25,7 +24,7 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
 			});
 		});
 
-
+		callback();
 
 	};
 
