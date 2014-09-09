@@ -3,7 +3,7 @@ var path = require('path'),
 	version = require(path.join(process.cwd(), 'package.json')).version,
 	versionSuffix = process.env.NODE_ENV ? '' : ('-' + Math.round(Math.random()*100000));
 
-module.exports = function (swig, options) {
+module.exports = function (swig, options, translate) {
 
 	return function(callback) {
 
@@ -13,12 +13,7 @@ module.exports = function (swig, options) {
 			return busted;
 		});
 
-		swig.setFilter('translate', function (text) {
-			for (var i = options.dictionaries.length - 1; i >= 0; i--) {
-				if (options.dictionaries[i][text]) return options.dictionaries[i][text];
-			}
-			return text;
-		});
+		swig.setFilter('translate', translate);
 
 		callback();
 

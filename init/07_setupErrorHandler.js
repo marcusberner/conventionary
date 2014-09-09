@@ -18,7 +18,18 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
 				displayErrorMessage = options.displayErrorMessage;
 			addWidgetRenderers(internalRequestContext, requestContext);
 			renderTemplate(templatePath, internalRequestContext, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
-				if (err) return next(err);
+
+				if (err) {
+					var message = 'Internal server error';
+					if (displayErrorMessage) message += ('\n' + err.message);
+					res.status(500);
+					res.set({
+						'Content-Type': 'text/plain'
+					});
+					res.send(message);
+					return;
+				}
+
 				res.status(500);
 				res.set({
 					'Content-Type': 'text/html'
