@@ -14,9 +14,10 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
 			var internalRequestContext = {},
 				requestContext = {
 					request: req
-				};
+				},
+				displayErrorMessage = options.displayErrorMessage;
 			addWidgetRenderers(internalRequestContext, requestContext);
-			renderTemplate(templatePath, internalRequestContext, { error: err.message }, function (err, html) {
+			renderTemplate(templatePath, internalRequestContext, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
 				if (err) return next(err);
 				res.status(500);
 				res.set({
