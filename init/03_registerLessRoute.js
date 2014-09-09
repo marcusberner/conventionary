@@ -21,6 +21,14 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 							if (widget.wrap) data += '}';
 						});
 					}
+					if (req.query.includeWidgetTheme) {
+						widgets.forEach(function(widget) {
+							if (!widget.themes[req.query.includeWidgetTheme]) return;
+							if (widget.wrap) data += ('.widget-' + widget.path.join('_') + '{');
+							data += (' @import \''+ path.relative(path.dirname(pathAndType.path), widget.themes[req.query.includeWidgetTheme].less) + '\'; ');
+							if (widget.wrap) data += '}';
+						});
+					}
 					lessCompiler(pathAndType.path, data, function (err, css) {
 						if (err) return next(err);
 						if (!css) return next();
