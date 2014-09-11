@@ -2,7 +2,7 @@
 module.exports = function (app, express, options) {
 
 	return function(callback) {
-		app.use(express.static(options.staticPath));
+		app.use(options.staticRoot, express.static(options.staticPath));
 		callback();
 	}
 

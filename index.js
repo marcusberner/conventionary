@@ -39,6 +39,7 @@ module.exports = function(options, callback) {
 
 function setDefaults(options) {
 	options.dictionaries = options.dictionaries || [];
+	options.staticRoot = options.staticRoot || '/public';
 	options.lessPath = toAbsolutePath(options.lessPath || './style');
 	options.staticPath = toAbsolutePath(options.staticPath || './public');
 	options.scriptPath = toAbsolutePath(options.scriptPath || './script');
