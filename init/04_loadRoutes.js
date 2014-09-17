@@ -80,10 +80,11 @@ function registerRoute(app, route, templatePath, callback) {
 				request: req
 			};
 		_addWidgetRenderers(internalRequestContext, requestContext);
-		test(requestContext, function (err, result) {
+		var that = {};
+		test.bind(that)(requestContext, function (err, result) {
 			if (err) return next(err);
 			if (!result) return next();
-			factory(requestContext, function (err, model, options) {
+			factory.bind(that)(requestContext, function (err, model, options) {
 				if (err) return next(err);
 				options = options || {};
 				if (options.template) templatePath = path.join(templatePath, '../', options.template);
