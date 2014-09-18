@@ -2,7 +2,7 @@
 var fs = require('fs'),
 	path = require('path');
 
-module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
+module.exports = function (app, options, addWidgetRenderers, renderTemplate, logger) {
 
 	return function (callback) {
 
@@ -11,13 +11,12 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate) {
 
 		app.use(function(err, req, res, next){
 
-			var internalRequestContext = {},
-				requestContext = {
-					request: req
-				},
+			logger.error(err);
+
+			var requestContext = {},
 				displayErrorMessage = options.displayErrorMessage;
-			addWidgetRenderers(internalRequestContext, requestContext);
-			renderTemplate(templatePath, internalRequestContext, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
+			addWidgetRenderers(requestContext);
+			renderTemplate(templatePath, requestContext, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
 
 				if (err) {
 					var message = 'Internal server error';
