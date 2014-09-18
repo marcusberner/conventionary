@@ -9,9 +9,9 @@ module.exports = function (app, options, renderTemplate, logger) {
 		var templatePath = path.join(options.routePath, '500.html');
 		if (!fs.existsSync(templatePath)) return callback();
 
-		app.use(function(err, req, res, next){
+		app.use(function(err, req, res){
 
-			logger.error(err);
+			logger.error(err.stack);
 			var displayErrorMessage = options.displayErrorMessage;
 			renderTemplate(templatePath, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
 
