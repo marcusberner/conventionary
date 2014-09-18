@@ -2,7 +2,7 @@
 var fs = require('fs'),
 	path = require('path');
 
-module.exports = function (app, options, addWidgetRenderers, renderTemplate, logger) {
+module.exports = function (app, options, renderTemplate, logger) {
 
 	return function (callback) {
 
@@ -12,11 +12,8 @@ module.exports = function (app, options, addWidgetRenderers, renderTemplate, log
 		app.use(function(err, req, res, next){
 
 			logger.error(err);
-
-			var requestContext = {},
-				displayErrorMessage = options.displayErrorMessage;
-			addWidgetRenderers(requestContext);
-			renderTemplate(templatePath, requestContext, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
+			var displayErrorMessage = options.displayErrorMessage;
+			renderTemplate(templatePath, { error: (displayErrorMessage ? err.message : '') }, function (err, html) {
 
 				if (err) {
 					var message = 'Internal server error';

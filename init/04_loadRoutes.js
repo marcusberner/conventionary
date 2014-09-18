@@ -3,14 +3,12 @@ var fs = require('fs'),
 	path = require('path'),
 	async = require('async'),
 	routeCount,
-	_addWidgetRenderers,
 	_renderTemplate;
 
-module.exports = function (app, options, siteSandal, addWidgetRenderers, renderTemplate, logger) {
+module.exports = function (app, options, siteSandal, renderTemplate, logger) {
 
 	return function (callback) {
 
-		_addWidgetRenderers = addWidgetRenderers;
 		_renderTemplate = renderTemplate;
 		routeCount = 0;
 
@@ -74,9 +72,7 @@ function registerRoute(app, route, templatePath, callback) {
 
 	app.get(route.path, function(req, res, next){
 		var test = route.test || function (testRequest, testCallback) { testCallback(null, true); },
-			factory = route.factory || function (testRequest, factoryCallback) { factoryCallback(null, {}); },
-			requestContext = {};
-		_addWidgetRenderers(requestContext);
+			factory = route.factory || function (testRequest, factoryCallback) { factoryCallback(null, {}); };
 		var that = {};
 		test.bind(that)(req, function (err, result) {
 			if (err) return next(err);
@@ -85,7 +81,7 @@ function registerRoute(app, route, templatePath, callback) {
 				if (err) return next(err);
 				options = options || {};
 				if (options.template) templatePath = path.join(templatePath, '../', options.template);
-				_renderTemplate(templatePath, requestContext, model, function (err, html) {
+				_renderTemplate(templatePath, model, function (err, html) {
 					if (err) return next(err);
 					res.set({
 						'Content-Type': 'text/html'
