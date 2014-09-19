@@ -1,5 +1,5 @@
 
-module.exports = function (app, widgets, renderTemplate, randomString, wrapWidget) {
+module.exports = function (app, widgets, renderTemplate, randomString, wrapWidget, renderWidget) {
 
 	return function(callback) {
 
@@ -18,24 +18,15 @@ module.exports = function (app, widgets, renderTemplate, randomString, wrapWidge
 			req.on('end', function() {
 				try {
 					var params = (body === '') ? {} : JSON.parse(body),
-						wrap = widget.wrap,
-						identifier = 'widget-' + randomString(),
-						that = {};
-					if (req.query.wrap === 'true') wrap = true;
-					else if (req.query.wrap === 'false') wrap = false;
-					widget.test.bind(that)(params, function (err, result) {
+						options = {
+							wrap: widget.wrap
+						};
+					if (req.query.wrap === 'true') options.wrap = true;
+					else if (req.query.wrap === 'false') options.wrap = false;
+
+					renderWidget(widget, params, renderTemplate, options, function (err, html) {
 						if (err) return next(err);
-						if (!result) return next();
-						widget.factory.bind(that)(params, function (err, widgetModel, options) {
-							if (err) return next(err);
-							options = options || {};
-							var templatePath = widget.template;
-							if (options.template) templatePath = path.join(widget.dir, options.template);
-							renderTemplate(templatePath, widgetModel, function (err, widgetHtml) {
-								if (err) return next(err);
-								res.send(wrap ? wrapWidget(widget, identifier, widgetHtml) : widgetHtml);
-							});
-						});
+						res.send(html);
 					});
 				} catch (e) {
 					return next(e);
