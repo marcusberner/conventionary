@@ -1,5 +1,5 @@
 
-module.exports = function (app, widgets, renderTemplate, randomString, wrapWidget, renderWidget) {
+module.exports = function (app, widgets, renderTemplate, randomString, renderWidget) {
 
 	return function(callback) {
 
