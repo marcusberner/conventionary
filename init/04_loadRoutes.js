@@ -65,12 +65,18 @@ function registerRoute(app, route, templatePath, callback) {
 
 	routeCount++;
 
+	var method = 'get';
+
+	if (route.method) {
+		method = route.method.toLowerCase();
+	}
+
 	if (route.handler) {
-		app.get(route.path, route.handler);
+		app[method](route.path, route.handler);
 		return callback();
 	}
 
-	app.get(route.path, function(req, res, next){
+	app[method](route.path, function(req, res, next){
 		var test = route.test || function (testRequest, testCallback) { testCallback(null, true); },
 			factory = route.factory || function (testRequest, factoryCallback) { factoryCallback(null, {}); };
 		var that = {};
