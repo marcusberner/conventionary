@@ -17,14 +17,8 @@ module.exports = function (app, widgets, renderTemplate, randomString, renderWid
 			});
 			req.on('end', function() {
 				try {
-					var params = (body === '') ? {} : JSON.parse(body),
-						options = {
-							wrap: widget.wrap
-						};
-					if (req.query.wrap === 'true') options.wrap = true;
-					else if (req.query.wrap === 'false') options.wrap = false;
-
-					renderWidget(widget, params, renderTemplate, options, function (err, html) {
+					var params = (body === '') ? {} : JSON.parse(body);
+					renderWidget(widget, params, req.query, renderTemplate, function (err, html) {
 						if (err) return next(err);
 						res.send(html);
 					});

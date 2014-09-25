@@ -16,17 +16,17 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 					if (req.query.includeWidgets === 'true') {
 						widgets.forEach(function(widget) {
 							if (!widget.less) return;
-							if (widget.wrap) less += ('.' + widget.cssClass + '{');
+							if (!widget.options || widget.options.wrap !== false) less += ('.' + widget.cssClass + '{');
 							less += (' @import \''+ path.relative(path.dirname(pathAndType.path), widget.less) + '\'; ');
-							if (widget.wrap) less += '}';
+							if (!widget.options || widget.options.wrap !== false) less += '}';
 						});
 					}
 					if (req.query.includeWidgetTheme) {
 						widgets.forEach(function(widget) {
 							if (!widget.themes[req.query.includeWidgetTheme]) return;
-							if (widget.wrap) less += ('.' + widget.cssClass + '{');
+							if (!widget.options || widget.options.wrap !== false) less += ('.' + widget.cssClass + '{');
 							less += (' @import \''+ path.relative(path.dirname(pathAndType.path), widget.themes[req.query.includeWidgetTheme].less) + '\'; ');
-							if (widget.wrap) less += '}';
+							if (!widget.options || widget.options.wrap !== false) less += '}';
 						});
 					}
 					lessCompiler(pathAndType.path, less, function (err, css) {
