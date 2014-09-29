@@ -7,7 +7,8 @@ module.exports = function (app, widgets, options) {
 
 	return function (callback) {
 
-		var virtualScriptFolder = '/script',
+		var cache = {},
+			virtualScriptFolder = '/script',
 			allScriptUrl = virtualScriptFolder + '/all.js',
 			allScriptMapUrl = virtualScriptFolder + '/all.js.map',
 			scripts;
@@ -29,7 +30,9 @@ module.exports = function (app, widgets, options) {
 		});
 
 		app.get(allScriptUrl, function(req, res){
-			sendScript(res, uglify.minify(scripts.map(function(script) { return script.file; })).code + '\n//# sourceMappingURL=' + allScriptMapUrl);
+			if (cache[req.url]) return sendScript(res, cache[req.url]);
+			cache[req.url] = uglify.minify(scripts.map(function(script) { return script.file; })).code + '\n//# sourceMappingURL=' + allScriptMapUrl;
+			sendScript(res, cache[req.url]);
 		});
 
 		app.get(allScriptMapUrl, function(req, res){
@@ -67,3 +70,4 @@ function sendScript(res, script) {
 	});
 	res.send(script);
 }
+

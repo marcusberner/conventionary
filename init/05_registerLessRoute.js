@@ -5,9 +5,11 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 
 	return function (callback) {
 
-		var virtualStyleFolder = '/style';
+		var cache = {},
+			virtualStyleFolder = '/style';
 
 		app.get(path.join(virtualStyleFolder, '*'), function (req, res, next) {
+			if (cache[req.url]) return sendCss(res, cache[req.url]);
 			getFilePathAndType(req.path, function (pathAndType) {
 				if (!pathAndType) return next();
 				getLess(siteSandal, req, pathAndType, function (err, less) {
@@ -32,6 +34,7 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 					lessCompiler(pathAndType.path, less, function (err, css) {
 						if (err) return next(err);
 						if (!css) return next();
+						cache[req.url] = css;
 						sendCss(res, css);
 					});
 				});
