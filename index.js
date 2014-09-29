@@ -16,21 +16,21 @@ module.exports = function(options, callback) {
 		siteSandal = new Sandal(),
 		express = require('express'),
 		swig = require('swig'),
-		app = express(),
-		initFunctions = [];
+		app = express();
 
 	registerSiteDependencies(siteSandal, options, express, swig, app);
 	registerInternalDependencies(sandal, siteSandal, options, express, swig, app);
 
-	sandal.resolve(['init', 'logger', 'app'], function (err, fwInit, logger, app) {
+	siteSandal.resolve('init', function (err, siteInit) {
 		if (err) return callback(err);
-		siteSandal.resolve('init', function (err, siteInit) {
+		async.series(toSortedList(siteInit), function (err) {
 			if (err) return callback(err);
-			addInitFunctions(initFunctions, siteInit, logger);
-			addInitFunctions(initFunctions, fwInit, logger);
-			async.series(initFunctions, function (err) {
+			sandal.resolve(['init', 'app'], function (err, fwInit, app) {
 				if (err) return callback(err);
-				callback(null, app);
+				async.series(toSortedList(fwInit), function (err) {
+					if (err) return callback(err);
+					callback(null, app);
+				});
 			});
 		});
 	});
@@ -76,11 +76,10 @@ function registerInternalDependencies(sandal, siteSandal, options, express, swig
 	if (!sandal.has('init')) sandal.object('init', {});
 }
 
-function addInitFunctions(list, init, logger) {
-	Object.keys(init).sort().forEach(function (key) {
-		list.push(function (done) {
-			logger.info(prettyCamel(key.replace(/^\d+_?-?/, '')));
+function toSortedList(init) {
+	return Object.keys(init).sort().map(function (key) {
+		return function (done) {
 			init[key](done);
-		});
+		};
 	});
 }
