@@ -31,6 +31,10 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 							if (!widget.options || widget.options.wrap !== false) less += '}';
 						});
 					}
+					if (less === '') {
+						cache[req.url] = '';
+						return sendCss(res, '');
+					}
 					lessCompiler(pathAndType.path, less, function (err, css) {
 						if (err) return next(err);
 						if (!css) return next();
