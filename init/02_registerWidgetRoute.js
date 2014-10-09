@@ -28,7 +28,28 @@ module.exports = function (app, widgets, renderTemplate, randomString, renderWid
 			});
 		});
 
+		app.get('/widgets.*', function(req, res, next){
+
+			var widget = widgets.filter(function (widget) {
+				return widget.type === req.params['0'];
+			})[0];
+
+			if (!widget) return next();
+
+			var params = JSON.parse(decodeURIComponent(req.query.params)),
+				options = req.query;
+
+			delete options.params;
+
+			renderWidget(widget, params, options, renderTemplate, function (err, html) {
+				if (err) return next(err);
+				res.send(html);
+			});
+
+		});
+
 		callback();
+
 	}
 
 };
