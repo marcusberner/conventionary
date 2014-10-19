@@ -1,5 +1,5 @@
 var path = require('path'),
-	prettyCamel = require('pretty-camel'),
+	fs = require('fs'),
 	async = require('async'),
 	Sandal = require('sandal').extend(require('sandal-autowire'));
 
@@ -58,9 +58,13 @@ function registerSiteDependencies(siteSandal, options, express, swig, app) {
 	siteSandal
 		.object('express', express)
 		.object('swig', swig)
-		.object('app', app)
-		.autowire(options.initPath, { groups: ['init'] })
-		.autowire(options.libPath);
+		.object('app', app);
+	if (fs.existsSync(options.initPath)) {
+		siteSandal.autowire(options.initPath, { groups: ['init'] });
+	}
+	if (fs.existsSync(options.libPath)) {
+		siteSandal.autowire(options.libPath);
+	}
 	if (!siteSandal.has('init')) siteSandal.object('init', {});
 }
 
@@ -73,7 +77,6 @@ function registerInternalDependencies(sandal, siteSandal, options, express, swig
 		.object('app', app)
 		.autowire(path.join(__dirname, '/init'), { groups: ['init'] })
 		.autowire(path.join(__dirname, '/lib'));
-	if (!sandal.has('init')) sandal.object('init', {});
 }
 
 function toSortedList(init) {
