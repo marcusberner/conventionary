@@ -1,7 +1,7 @@
 {
-  "name": "conventional",
+  "name": "conventionary",
   "version": "0.0.1",
-  "description": "Convention based web framework",
+  "description": "Convention over configuration web framework",
   "main": "index.js",
   "scripts": {
     "test": "tape \"test/**/*.js\""

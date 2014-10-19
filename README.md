@@ -1,7 +1,7 @@
-conventional
+conventionary
 ============
 
-Convention based web framework for node.js
+Convention over configuration web framework for node.js
 
 Currently in alpha. Expect breaking patch updates until version 0.1.0.
 
