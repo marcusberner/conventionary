@@ -23,5 +23,5 @@
   "devDependencies": {
     "tape": "~2.12.2"
   },
-  "repository": "https://github.com/marcusberner/conventional.git"
+  "repository": "https://github.com/marcusberner/conventionary.git"
 }
