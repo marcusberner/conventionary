@@ -20,7 +20,7 @@ module.exports = function(options, callback) {
 
 	// Clear swig from require cache to enable multiple instances in same app
 	Object.keys(require.cache).forEach(function (cacheKey) {
-		if (cacheKey.indexOf(path.join(__dirname, 'node_modules', 'swig')) >= 0)  delete require.cache[cacheKey];
+		if (cacheKey.split(path.sep).indexOf('swig') >= 0) delete require.cache[cacheKey];
 	});
 	swig = require('swig');
 
