@@ -15,8 +15,14 @@ module.exports = function(options, callback) {
 	var sandal = new Sandal(),
 		siteSandal = new Sandal(),
 		express = require('express'),
-		swig = require('swig'),
+		swig,
 		app = express();
+
+	// Clear swig from require cache to enable multiple instances in same app
+	Object.keys(require.cache).forEach(function (cacheKey) {
+		if (cacheKey.indexOf(path.join(__dirname, 'node_modules', 'swig')) >= 0)  delete require.cache[cacheKey];
+	});
+	swig = require('swig');
 
 	registerSiteDependencies(siteSandal, options, express, swig, app);
 	registerInternalDependencies(sandal, siteSandal, options, express, swig, app);
@@ -59,6 +65,11 @@ function registerSiteDependencies(siteSandal, options, express, swig, app) {
 		.object('express', express)
 		.object('swig', swig)
 		.object('app', app);
+	if (options.dependencies) {
+		for (var name in options.dependencies) {
+			siteSandal.object(name, options.dependencies[name]);
+		}
+	}
 	if (fs.existsSync(options.initPath)) {
 		siteSandal.autowire(options.initPath, { groups: ['init'] });
 	}

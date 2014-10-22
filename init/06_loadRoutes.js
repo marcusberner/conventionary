@@ -7,7 +7,10 @@ module.exports = function (app, options, siteSandal, renderTemplate, logger) {
 
 	var registerRoute = function (route, defaultTemplate) {
 
-		var method = route.method ? route.method.toLowerCase() : 'get';
+		var method = route.method ? route.method.toLowerCase() : 'get',
+			routeModelMap = options.routeModelMap || function (model, callback) {
+				callback(null, model);
+			};
 
 		if (route.handler) return app[method](route.path, route.handler);
 
@@ -22,12 +25,15 @@ module.exports = function (app, options, siteSandal, renderTemplate, logger) {
 					if (err) return next(err);
 					options = options || {};
 					if (options.template) defaultTemplate = path.join(defaultTemplate, '../', options.template);
-					renderTemplate(defaultTemplate, model, function (err, html) {
+					routeModelMap(model, function (err, model) {
 						if (err) return next(err);
-						res.set({
-							'Content-Type': 'text/html'
+						renderTemplate(defaultTemplate, model, function (err, html) {
+							if (err) return next(err);
+							res.set({
+								'Content-Type': 'text/html'
+							});
+							res.send(html);
 						});
-						res.send(html);
 					});
 				});
 
