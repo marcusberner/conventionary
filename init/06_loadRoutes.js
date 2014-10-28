@@ -3,14 +3,11 @@ var path = require('path'),
 	async = require('async'),
 	glob = require('glob');
 
-module.exports = function (app, options, siteSandal, renderTemplate, logger) {
+module.exports = function (app, options, siteSandal, renderTemplate) {
 
 	var registerRoute = function (route, defaultTemplate) {
 
-		var method = route.method ? route.method.toLowerCase() : 'get',
-			routeModelMap = options.routeModelMap || function (model, callback) {
-				callback(null, model);
-			};
+		var method = route.method ? route.method.toLowerCase() : 'get';
 
 		if (route.handler) return app[method](route.path, route.handler);
 
@@ -21,13 +18,16 @@ module.exports = function (app, options, siteSandal, renderTemplate, logger) {
 			test.bind(that)(req, function (err, result) {
 				if (err) return next(err);
 				if (!result) return next();
-				factory.bind(that)(req, function (err, model, options) {
+				factory.bind(that)(req, function (err, routeModel, routeOptions) {
 					if (err) return next(err);
-					options = options || {};
-					if (options.template) defaultTemplate = path.join(defaultTemplate, '../', options.template);
-					routeModelMap(model, function (err, model) {
+					routeModel = routeModel || {};
+					routeOptions = routeOptions || {};
+					options.routeMap(routeModel, routeOptions, function (err, mappedModel, mappedOptions) {
 						if (err) return next(err);
-						renderTemplate(defaultTemplate, model, function (err, html) {
+						routeModel = mappedModel || routeModel;
+						routeOptions = mappedOptions || routeOptions;
+						if (routeOptions.template) defaultTemplate = path.join(defaultTemplate, '../', routeOptions.template);
+						renderTemplate(defaultTemplate, routeModel, function (err, html) {
 							if (err) return next(err);
 							res.set({
 								'Content-Type': 'text/html'

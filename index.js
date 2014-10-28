@@ -53,6 +53,14 @@ function setDefaults(options) {
 	options.initPath = toAbsolutePath(options.initPath || './init');
 	options.widgetPath = toAbsolutePath(options.widgetPath || './widgets');
 	options.routePath = toAbsolutePath(options.routePath || './routes');
+
+	options.routeMap = options.routeMap || function (model, options, callback) {
+		callback(null, model, options);
+	};
+	options.widgetMap = options.widgetMap || function (model, options, callback) {
+		callback(null, model, options);
+	};
+
 }
 
 function toAbsolutePath(input) {
