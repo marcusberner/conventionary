@@ -31,11 +31,13 @@ module.exports = function (app, widgets, options) {
 
 		app.get(allScriptUrl, function(req, res){
 			if (cache[req.url]) return sendScript(res, cache[req.url]);
+			if (!scripts) return sendScript(res, '');
 			cache[req.url] = uglify.minify(scripts.map(function(script) { return script.file; })).code + '\n//# sourceMappingURL=' + allScriptMapUrl;
 			sendScript(res, cache[req.url]);
 		});
 
 		app.get(allScriptMapUrl, function(req, res){
+			if (!scripts) return sendScript(res, '');
 			var map = uglify.minify(scripts.map(function(script) { return script.file; }), { outSourceMap: allScriptMapUrl }).map;
 			scripts.forEach(function (script) {
 				map = map.replace('"' + script.file + '"', '"' + script.url + '"');
