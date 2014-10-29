@@ -22,7 +22,7 @@ module.exports = function (app, options, siteSandal, renderTemplate) {
 					if (err) return next(err);
 					routeModel = routeModel || {};
 					routeOptions = routeOptions || {};
-					options.routeMap(routeModel, routeOptions, function (err, mappedModel, mappedOptions) {
+					options.routeMap.bind({ req: req })(routeModel, routeOptions, function (err, mappedModel, mappedOptions) {
 						if (err) return next(err);
 						routeModel = mappedModel || routeModel;
 						routeOptions = mappedOptions || routeOptions;
