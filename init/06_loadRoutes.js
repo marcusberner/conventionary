@@ -5,6 +5,18 @@ var path = require('path'),
 
 module.exports = function (app, options, siteSandal, renderTemplate) {
 
+	var sendResponse = function (res, body, routeOptions) {
+		res.set({
+			'Content-Type': routeOptions.contentType || 'text/html'
+		});
+		if (routeOptions.headers) {
+			for (var header in routeOptions.headers) {
+				res.header(header, routeOptions.headers[header]);
+			}
+		}
+		res.send(body);
+	};
+
 	var registerRoute = function (route, defaultTemplate) {
 
 		var method = route.method ? route.method.toLowerCase() : 'get';
@@ -26,13 +38,11 @@ module.exports = function (app, options, siteSandal, renderTemplate) {
 						if (err) return next(err);
 						routeModel = mappedModel || routeModel;
 						routeOptions = mappedOptions || routeOptions;
+						if (typeof(routeModel) === 'string') return sendResponse(res, routeModel, routeOptions);
 						if (routeOptions.template) defaultTemplate = path.join(defaultTemplate, '../', routeOptions.template);
 						renderTemplate(defaultTemplate, routeModel, function (err, html) {
 							if (err) return next(err);
-							res.set({
-								'Content-Type': 'text/html'
-							});
-							res.send(html);
+							sendResponse(res, html, routeOptions);
 						});
 					});
 				});
