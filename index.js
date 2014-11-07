@@ -1,4 +1,5 @@
-var path = require('path'),
+var http = require('http'),
+	path = require('path'),
 	fs = require('fs'),
 	async = require('async'),
 	Sandal = require('sandal').extend(require('sandal-autowire'));
@@ -9,6 +10,72 @@ module.exports = function(options, callback) {
 		callback = options;
 		options = {};
 	}
+
+	if (!(options instanceof Array)) {
+		return createSite(options, function (err, app) {
+			if (err) return callback(err);
+			callback(null, http.createServer(function (req, res) {
+				app(req, res);
+			}));
+		});
+	}
+
+	var error = optionsArrayError(options);
+	if (error) return callback(error);
+
+	var apps = options.reduce(function (apps, options) {
+		createSite(options, function (err, app) {
+			if (err) {
+				error = err;
+				return;
+			}
+			options.hosts.forEach(function (host) {
+				apps[host] = app;
+			});
+		});
+		return apps;
+	}, {});
+
+	if (error) return callback(error);
+
+	callback(null, http.createServer(function (req, res) {
+		if (!req || !req.headers || !req.headers.host) {
+			res.writeHead(400, {'Content-Type': 'text/plain'});
+			res.end('No host header provided\n');
+			return;
+		}
+		var app = apps[req.headers.host] || apps['*'];
+		if (!app) {
+			res.writeHead(404, {'Content-Type': 'text/plain'});
+			res.end('Site with host ' + req.headers.host + ' is not available\n');
+			return;
+		}
+		app(req, res);
+	}));
+
+};
+
+function optionsArrayError(optionsArray) {
+	var hosts = [],
+		error = null;
+	optionsArray.some(function (options) {
+		if (!options.hosts || !(options.hosts instanceof Array) || options.hosts.length === 0) {
+			error = new Error('All sites does not have host configured');
+		} else {
+			options.hosts.some(function (host) {
+				if (hosts.indexOf(host) >= 0) {
+					error = new Error('There are duplicates in the host configuration (' + host + ')');
+					return true;
+				}
+				hosts.push(host);
+			});
+		}
+		return !!error;
+	});
+	return error;
+}
+
+function createSite(options, callback) {
 
 	setDefaults(options);
 
@@ -22,11 +89,10 @@ module.exports = function(options, callback) {
 	Object.keys(require.cache).forEach(function (cacheKey) {
 		if (cacheKey.split(path.sep).indexOf('swig') >= 0) delete require.cache[cacheKey];
 	});
-	swig = require('swig');
 
+	swig = require('swig');
 	registerSiteDependencies(siteSandal, options, express, swig, app);
 	registerInternalDependencies(sandal, siteSandal, options, express, swig, app);
-
 	siteSandal.resolve('init', function (err, siteInit) {
 		if (err) return callback(err);
 		async.series(toSortedList(siteInit), function (err) {
@@ -40,8 +106,7 @@ module.exports = function(options, callback) {
 			});
 		});
 	});
-
-};
+}
 
 function setDefaults(options) {
 	options.dictionaries = options.dictionaries || [];
@@ -53,14 +118,12 @@ function setDefaults(options) {
 	options.initPath = toAbsolutePath(options.initPath || './init');
 	options.widgetPath = toAbsolutePath(options.widgetPath || './widgets');
 	options.routePath = toAbsolutePath(options.routePath || './routes');
-
 	options.routeMap = options.routeMap || function (model, options, callback) {
 		callback(null, model, options);
 	};
 	options.widgetMap = options.widgetMap || function (model, options, callback) {
 		callback(null, model, options);
 	};
-
 }
 
 function toAbsolutePath(input) {
