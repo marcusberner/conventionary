@@ -14,6 +14,9 @@ module.exports = function (app, options, siteSandal, renderTemplate) {
 				res.header(header, routeOptions.headers[header]);
 			}
 		}
+		if (routeOptions.status) {
+			res.status(routeOptions.status);
+		}
 		res.send(body);
 	};
 
