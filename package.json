@@ -1,6 +1,6 @@
 {
   "name": "conventionary",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Convention over configuration web framework",
   "main": "index.js",
   "scripts": {
