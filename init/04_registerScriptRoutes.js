@@ -13,7 +13,7 @@ module.exports = function (app, widgets, options) {
 			allScriptMapUrl = virtualScriptFolder + '/all.js.map',
 			scripts;
 
-		scripts = glob.sync(path.join(options.scriptPath, '/**/*.js')).map(function (file) {
+		scripts = glob.sync(path.join(options.scriptPath, '/**/*.js'), { nodir: true }).map(function (file) {
 			return {
 				file: file,
 				url: file.substring(options.scriptPath.length)
