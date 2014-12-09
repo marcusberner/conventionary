@@ -23,15 +23,26 @@ module.exports = function(options, callback) {
 	var error = optionsArrayError(options);
 	if (error) return callback(error);
 
+	var startedSites = 0;
+	var siteCount = options.length;
+	var requestQueue = [];
+
 	var apps = options.reduce(function (apps, options) {
 		createSite(options, function (err, app) {
 			if (err) {
-				error = err;
-				return;
+				console.error(err);
+				process.exit(-1);
 			}
 			options.hosts.forEach(function (host) {
 				apps[host] = app;
 			});
+			startedSites++;
+			if (startedSites === siteCount && requestQueue) {
+				requestQueue.forEach(function (requestQueueItem) {
+					requestQueueItem();
+				});
+				requestQueue = null;
+			}
 		});
 		return apps;
 	}, {});
@@ -44,13 +55,18 @@ module.exports = function(options, callback) {
 			res.end('No host header provided\n');
 			return;
 		}
-		var app = apps[req.headers.host] || apps['*'];
-		if (!app) {
-			res.writeHead(404, {'Content-Type': 'text/plain'});
-			res.end('Site with host ' + req.headers.host + ' is not available\n');
-			return;
-		}
-		app(req, res);
+		var requestQueueItem = function () {
+			var app = apps[req.headers.host] || apps['*'];
+			if (!app) {
+				res.writeHead(404, {'Content-Type': 'text/plain'});
+				res.end('Site with host ' + req.headers.host + ' is not available\n');
+				return;
+			}
+			app(req, res);
+		};
+		if (!apps[req.headers.host] && !apps['*'] && requestQueue) requestQueue.push(requestQueueItem);
+		else requestQueueItem();
+
 	}));
 
 };
