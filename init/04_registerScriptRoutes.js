@@ -29,18 +29,20 @@ module.exports = function (app, widgets, options) {
 			}));
 		});
 
-		app.get(allScriptUrl, function(req, res){
+		app.get(allScriptUrl, function(req, res, next){
+			if (req.query.v && req.query.v !== options.version) return next();
 			if (cache[req.url]) return sendScript(res, cache[req.url]);
 			if (!scripts) return sendScript(res, '');
 			cache[req.url] = uglify.minify(scripts.map(function(script) { return script.file; })).code + '\n//# sourceMappingURL=' + allScriptMapUrl;
 			sendScript(res, cache[req.url]);
 		});
 
-		app.get(allScriptMapUrl, function(req, res){
+		app.get(allScriptMapUrl, function(req, res, next){
+			if (req.query.v && req.query.v !== options.version) return next();
 			if (!scripts) return sendScript(res, '');
 			var map = uglify.minify(scripts.map(function(script) { return script.file; }), { outSourceMap: allScriptMapUrl }).map;
 			scripts.forEach(function (script) {
-				map = map.replace('"' + script.file + '"', '"' + script.url + '"');
+				map = map.replace('"' + script.file + '"', '"' + script.url + '?v=' + options.version + '"');
 			});
 			sendScript(res, map);
 		});
@@ -48,6 +50,7 @@ module.exports = function (app, widgets, options) {
 		// TODO: Should be one route
 		scripts.forEach(function (script) {
 			app.get(script.url, function (req, res, next) {
+				if (req.query.v && req.query.v !== options.version) return next();
 				fs.readFile(script.file, function (err, data) {
 					if (err) next(err);
 					sendScript(res, data);

@@ -125,6 +125,7 @@ function createSite(options, callback) {
 }
 
 function setDefaults(options) {
+	options.version = options.version || require(path.join(process.cwd(), 'package.json')).version;
 	options.dictionaries = options.dictionaries || [];
 	options.staticRoot = options.staticRoot || '/public';
 	options.lessPath = toAbsolutePath(options.lessPath || './style');

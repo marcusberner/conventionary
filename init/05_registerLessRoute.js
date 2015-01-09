@@ -9,6 +9,7 @@ module.exports = function (app, options, lessCompiler, widgets, siteSandal) {
 			virtualStyleFolder = '/style';
 
 		app.get(path.join(virtualStyleFolder, '*'), function (req, res, next) {
+			if (req.query.v && req.query.v !== options.version) return next();
 			if (cache[req.url]) return sendCss(res, cache[req.url]);
 			getFilePathAndType(req.path, function (pathAndType) {
 				if (!pathAndType) return next();
