@@ -41,7 +41,7 @@ module.exports = function (app, options, siteSandal, renderTemplate) {
 						if (err) return next(err);
 						routeModel = mappedModel || routeModel;
 						routeOptions = mappedOptions || routeOptions;
-						if (typeof(routeModel) === 'string') return sendResponse(res, routeModel, routeOptions);
+						if (typeof(routeModel) === 'string' || routeModel instanceof Buffer) return sendResponse(res, routeModel, routeOptions);
 						if (routeOptions.template) defaultTemplate = path.join(defaultTemplate, '../', routeOptions.template);
 						renderTemplate(defaultTemplate, routeModel, function (err, html) {
 							if (err) return next(err);
