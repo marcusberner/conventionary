@@ -30,7 +30,7 @@ module.exports = function(options, callback) {
 	var apps = options.reduce(function (apps, options) {
 		createSite(options, function (err, app) {
 			if (err) {
-				console.error(err);
+				console.error(err.stack);
 				process.exit(-1);
 			}
 			options.hosts.forEach(function (host) {
