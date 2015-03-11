@@ -66,11 +66,6 @@ module.exports = function (app, options, siteSandal, renderTemplate) {
 					template: jsFile.replace(/\.js$/i, '.html')
 				});
 			});
-			routes.sort(function (a, b) {
-				a.sortOrder = a.sortOrder || 0;
-				b.sortOrder = b.sortOrder || 0;
-				return a.sortOrder - b.sortOrder;
-			});
 
 			async.eachSeries(routes, function (route, routeCallback) {
 				if (typeof route.backend === 'function') {
